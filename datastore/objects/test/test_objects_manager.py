@@ -134,14 +134,20 @@ class TestManager(unittest.TestCase):
 
     q = mgr.init_query()
     self.assertFalse(q is None)
+
+    # Query on the manager
     results = list(mgr.query(q))
     self.assertEqual(len(results), 2)
 
-    results = list(mgr.query(mgr.init_query().filter('foo','=','bar1')))
+    # Perform the query directly
+    results = list(q.perform())
+    self.assertEqual(len(results), 2)
+
+    results = list(mgr.init_query().filter('foo','=','bar1').perform())
     self.assertEqual(len(results), 1)
     self.assertEqual(results[0], instance1)
 
-    results = list(mgr.query(mgr.init_query().filter('foo','=','bar2')))
+    results = list(mgr.init_query().filter('foo','=','bar2').perform())
     self.assertEqual(len(results), 1)
     self.assertEqual(results[0], instance2)
 

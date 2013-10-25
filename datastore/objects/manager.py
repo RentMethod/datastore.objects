@@ -2,6 +2,7 @@ from .model import Key
 from .model import Model
 from datastore import Query
 from .object_datastore import ObjectDatastore
+from .managed_query import ManagedQuery
 
 
 class Manager(object):
@@ -54,10 +55,10 @@ class Manager(object):
 
 
   def init_query(self):
-    '''Initiates a Query object for the model'''
+    '''Initiates a ManagedQuery object for the model'''
     if not self.model:
       raise Exception('Can not query when no model is set on the manager')
-    return Query(Key('/' + self.model.key_type))
+    return ManagedQuery(Key('/' + self.model.key_type), manager=self)
 
 
   def query(self, query):
