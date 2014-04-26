@@ -39,7 +39,7 @@ class TestCollectionManager(unittest.TestCase):
     ds = datastore.DictDatastore()
     mgr = CollectionManager(ds)
     mgr.model = Foo
-    self.assertEqual(mgr.key('bar'), Key('/foo:bar'))
+    self.assertEqual(mgr.instance_key('bar'), Key('/foo:bar'))
 
 
   def test_collection(self):

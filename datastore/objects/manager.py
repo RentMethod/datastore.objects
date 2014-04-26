@@ -2,7 +2,6 @@ from .model import Key
 from .model import Model
 from datastore import Query
 from .object_datastore import ObjectDatastore
-from .managed_query import ManagedQuery
 
 
 class Manager(object):
@@ -16,15 +15,18 @@ class Manager(object):
 
     self.datastore = ObjectDatastore(datastore, model=self.model)
 
+  @property
+  def key(self):
+    return Key(self.model.key_type)
 
-  def key(self, key_or_name):
+  def instance_key(self, key_or_name):
     '''Coerces `key_or_name` to be a proper model Key'''
     if not isinstance(key_or_name, Key):
-      return self.model.key.instance(key_or_name)
+      return self.key.instance(key_or_name)
 
-    if key_or_name.type != self.model.key.name:
+    if key_or_name.type != self.key.name:
       err = 'key %s must have key type %s'
-      raise TypeError(err % (key_or_name, self.model.key.name))
+      raise TypeError(err % (key_or_name, self.key.name))
 
     return key_or_name
 
@@ -33,12 +35,12 @@ class Manager(object):
 
   def contains(self, key):
     '''Returns whether manager contains instance named by `key_or_name`.'''
-    return self.datastore.contains(self.key(key))
+    return self.datastore.contains(self.instance_key(key))
 
 
   def get(self, key):
     '''Retrieves instance named by `key_or_name`.'''
-    return self.datastore.get(self.key(key))
+    return self.datastore.get(self.instance_key(key))
 
 
   def put(self, instance):
@@ -51,22 +53,17 @@ class Manager(object):
 
   def delete(self, key_or_name):
     '''Deletes instance named by `key_or_name`.'''
-    self.datastore.delete(self.key(key_or_name))
+    self.datastore.delete(self.instance_key(key_or_name))
 
 
-  def init_query(self):
-    '''Initiates a ManagedQuery object for the model'''
-    if not self.model:
-      raise Exception('Can not query when no model is set on the manager')
-    return ManagedQuery(Key('/' + self.model.key_type), manager=self)
-
-
-  def query(self, query):
+  def query(self, query=None):
     '''Execute a query on the underlying datastore'''
-    return self.datastore.query(query)
+    mgr_query = query.copy() if query else Query()
+    mgr_query.key = self.key.child(mgr_query.key)
+    return self.datastore.query(mgr_query)
 
 
   def remove_all_items(self):
     '''Removes all items from the datastore'''
-    for obj in self.query(self.init_query()):
+    for obj in self.query():
       self.delete(obj.key)

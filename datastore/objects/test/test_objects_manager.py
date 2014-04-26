@@ -5,6 +5,7 @@ from .. import manager
 from ..manager import Manager
 from ..model import Key
 from ..model import Model
+from datastore.core import Query
 from ..object_datastore import ObjectDatastore
 
 
@@ -132,22 +133,16 @@ class TestManager(unittest.TestCase):
     mgr.put(instance1)
     mgr.put(instance2)
 
-    q = mgr.init_query()
-    self.assertFalse(q is None)
-
-    # Query on the manager
-    results = list(mgr.query(q))
+    # Query all on the manager
+    results = list(mgr.query())
     self.assertEqual(len(results), 2)
 
-    # Perform the query directly
-    results = list(q.perform())
-    self.assertEqual(len(results), 2)
-
-    results = list(mgr.init_query().filter('foo','=','bar1').perform())
+    # Query with filter
+    results = list(mgr.query(Query().filter('foo','=','bar1')))
     self.assertEqual(len(results), 1)
     self.assertEqual(results[0], instance1)
 
-    results = list(mgr.init_query().filter('foo','=','bar2').perform())
+    results = list(mgr.query(Query().filter('foo','=','bar2')))
     self.assertEqual(len(results), 1)
     self.assertEqual(results[0], instance2)
 

@@ -11,8 +11,8 @@ class CollectionManager(Manager):
   Collection = Collection
 
 
-  def key(self, key_or_name):
-    '''Overrides Manager.key'''
+  def instance_key(self, key_or_name):
+    '''Overrides Manager.instance_key'''
     if not isinstance(key_or_name, Key):
       return self.collection_key.instance(key_or_name)
 
